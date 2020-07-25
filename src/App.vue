@@ -9,7 +9,7 @@
       maxlength="1"
       @input="updateSMSValue($event, index)"
       @click="selectedInputValue(index)"
-      @keydown="autoTriggerInput($event, index)"
+      @keyup="autoTriggerInput($event, index)"
     >
   </div>
 </template>
@@ -25,21 +25,20 @@ export default {
     selectedInputValue(index) {
       const [input] = this.$refs[index];
       input.select();
+      input.setSelectionRange(0, 1);
     },
     autoTriggerInput(e, index) {
-      console.log('key');
       const isWantedValue = this.checkInputValue(e.target.value);
+      let input;
+      (index + 1 >= this.smsValue.length || !isWantedValue)
+        ? [input] = this.$refs[index]
+        : [input] = this.$refs[index + 1];
 
-      if (index + 1 >= this.smsValue.length || !isWantedValue) {
-        const [input] = this.$refs[index];
-        input.select();
-      } else {
-        const [input] = this.$refs[index + 1];
-        input.select(); 
-      }
+      input.select(); 
+      // 兼容舊型手機瀏覽器使用
+      input.setSelectionRange(0, 1);
     },
     updateSMSValue(e, index) {
-      console.log('input');
       const isWantedValue = this.checkInputValue(e.target.value);
 
       !isWantedValue 
