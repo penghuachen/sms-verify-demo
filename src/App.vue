@@ -1,16 +1,17 @@
 <template>
   <div id="app">
     <h1>簡訊驗證碼元件</h1>
-    <input 
+    <input
       type="text"
-      v-for="(value, index) in smsValue" :key="index"
+      v-for="(value, index) in SMS"
+      :key="index"
       :ref="index"
       :value="value"
       maxlength="1"
-      @input="updateSMSValue($event, index)"
+      @input="updateSMS($event, index)"
       @click="selectedInputValue(index)"
-      @keyup="autoTriggerInput($event, index)"
-    >
+      @keyup="autoJumpNextInput($event, index)"
+    />
   </div>
 </template>
 
@@ -18,39 +19,43 @@
 export default {
   data() {
     return {
-      smsValue: [null, null, null, null],
-    }
+      SMS: [null, null, null, null]
+    };
   },
   methods: {
     selectedInputValue(index) {
       const [input] = this.$refs[index];
+      input.focus();
       input.select();
-      input.setSelectionRange(0, 1);
     },
-    autoTriggerInput(e, index) {
-      const isWantedValue = this.checkInputValue(e.target.value);
-      let input;
-      (index + 1 >= this.smsValue.length || !isWantedValue)
-        ? [input] = this.$refs[index]
-        : [input] = this.$refs[index + 1];
+    autoJumpNextInput(e, index) {
+      if (index + 1 === this.SMS.length) return;
 
-      input.select(); 
-      // 兼容舊型手機瀏覽器使用
-      input.setSelectionRange(0, 1);
+      const isValidValue = this.checkInputValue(e.target.value);
+
+      let [input] =
+        index + 1 >= this.SMS.length || !isValidValue
+          ? this.$refs[index]
+          : this.$refs[index + 1];
+
+      if (index + 1 >= this.SMS.length || isValidValue) {
+        input.focus();
+        input.select();
+      }
     },
-    updateSMSValue(e, index) {
-      const isWantedValue = this.checkInputValue(e.target.value);
+    updateSMS(e, index) {
+      const isValidValue = this.checkInputValue(e.target.value);
 
-      !isWantedValue 
-        ? this.smsValue[index] = null
-        : this.smsValue[index] = Number(isWantedValue);
-      this.smsValue = [...this.smsValue];
+      !isValidValue
+        ? (this.SMS[index] = null)
+        : (this.SMS[index] = isValidValue);
+      this.SMS = [...this.SMS];
     },
     checkInputValue(value) {
-      return value.replace(/[^\d]/g, '');
+      return value.replace(/[^\d]/g, "");
     }
   }
-}
+};
 </script>
 
 <style lang="scss">
